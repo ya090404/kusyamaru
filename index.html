@@ -51,25 +51,29 @@
     function handleClick() {
       if (!allowNextTap || count >= totalPunches) return;
 
-      count++;
+      // 爆発（33発目）
+      if (count === 32) {
+        allowNextTap = false;
+        count++;
+        showImage(explosionImage);
+        playSound(explosionSrc);
+        setTimeout(() => {
+          allowNextTap = true;
+        }, 2000); // 2秒間待機
+        return;
+      }
 
-      if (count === 34) {
+      // すっきり（34発目）
+      if (count === 33) {
+        count++;
         showImage(clearImage);
         playSound(clearSrc);
         return;
       }
 
-      if (count === 33) {
-        showImage(explosionImage);
-        playSound(explosionSrc);
-        allowNextTap = false;
-        setTimeout(() => {
-          allowNextTap = true;
-        }, 2000); // 2秒間だけタップ無効
-        return;
-      }
-
-      if (count % 10 === 0) {
+      // ヒビ演出（10, 20, 30発目）
+      if ((count + 1) % 10 === 0 && count < 30) {
+        count++;
         const index = Math.floor(count / 10) - 1;
         if (crackImages[index]) {
           showImage(crackImages[index]);
@@ -78,6 +82,8 @@
         return;
       }
 
+      // 通常パンチ（左右交互）
+      count++;
       if (isRight) {
         showImage("punch_right.PNG");
       } else {
