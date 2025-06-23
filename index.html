@@ -53,7 +53,7 @@
     let isExplosionPlaying = false;
     let isClearShown = false;
 
-    // プリロード
+    // 画像プリロード
     const preloadImages = [
       startImage, clearImage, explosionImage,
       ...crackImages, ...punchRightImages, ...punchLeftImages
@@ -112,7 +112,9 @@
       if (count === 33) {
         isExplosionPlaying = true;
         showImage(explosionImage);
-        playFixedSound(explosionSound, () => {
+        const explosionAudio = new Audio(explosionSound);
+        explosionAudio.play().catch(() => {});
+        explosionAudio.addEventListener("ended", () => {
           isExplosionPlaying = false;
         });
         count++;
@@ -127,7 +129,7 @@
         setTimeout(() => {
           isCrackTime = false;
           if (count === 30) {
-            count = 32;
+            count = 32; // 爆発の1つ前に調整
           } else {
             showImage(isRight ? punchRightImages[rightIndex] : punchLeftImages[leftIndex]);
           }
@@ -136,7 +138,7 @@
         return;
       }
 
-      // パンチ交互表示
+      // パンチ画像切り替え
       if (isRight) {
         showImage(punchRightImages[rightIndex]);
         rightIndex = (rightIndex + 1) % punchRightImages.length;
