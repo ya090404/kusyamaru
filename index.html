@@ -38,6 +38,7 @@
     const crackImages = ["crack_1.PNG", "crack_2.PNG", "crack_3.PNG"];
     const explosionImage = "explosion.PNG";
     const clearImage = "clear.PNG";
+    const restartImage = "restart.PNG";
     const startImage = "start.PNG";
     const startSound = "start.mp3";
     const explosionSound = "explosion.mp3";
@@ -52,11 +53,10 @@
     let gameStarted = false;
     let isExplosionPlaying = false;
     let isClearShown = false;
-    let isTapDisabled = false;
+    let isRestartMode = false;
 
-    // プリロード
     const preloadImages = [
-      startImage, clearImage, explosionImage,
+      startImage, clearImage, explosionImage, restartImage,
       ...crackImages, ...punchRightImages, ...punchLeftImages
     ];
     preloadImages.forEach(src => {
@@ -83,8 +83,28 @@
       }
     }
 
+    function resetGame() {
+      count = 0;
+      isRight = true;
+      rightIndex = 0;
+      leftIndex = 0;
+      isCrackTime = false;
+      gameStarted = false;
+      isExplosionPlaying = false;
+      isClearShown = false;
+      isRestartMode = false;
+    }
+
     function handleClick() {
-      if (isTapDisabled) return;
+      if (isRestartMode) {
+        image.classList.add("hidden");
+        setTimeout(() => {
+          showImage(startImage);
+          image.classList.remove("hidden");
+          resetGame();
+        }, 600);
+        return;
+      }
 
       if (!gameStarted) {
         gameStarted = true;
@@ -100,7 +120,12 @@
       if (count === 34 && !isClearShown) {
         isClearShown = true;
         showImage(clearImage);
-        playFixedSound(clearSound);
+        playFixedSound(clearSound, () => {
+          setTimeout(() => {
+            showImage(restartImage);
+            isRestartMode = true;
+          }, 3000);
+        });
         count++;
         return;
       }
@@ -114,16 +139,10 @@
 
       if (count === 33) {
         isExplosionPlaying = true;
-        isTapDisabled = true; // ← ここでタップを無効化
         showImage(explosionImage);
-        const explosionAudio = new Audio(explosionSound);
-        explosionAudio.play().catch(() => {});
-        explosionAudio.addEventListener("ended", () => {
+        playFixedSound(explosionSound, () => {
           isExplosionPlaying = false;
         });
-        setTimeout(() => {
-          isTapDisabled = false; // ← 2秒後に再びタップ可能に
-        }, 2000);
         count++;
         return;
       }
@@ -136,7 +155,7 @@
         setTimeout(() => {
           isCrackTime = false;
           if (count === 30) {
-            count = 32; // 爆発の1つ前に調整
+            count = 32;
           } else {
             showImage(isRight ? punchRightImages[rightIndex] : punchLeftImages[leftIndex]);
           }
@@ -145,7 +164,6 @@
         return;
       }
 
-      // パンチ表示（交互・2パターン）
       if (isRight) {
         showImage(punchRightImages[rightIndex]);
         rightIndex = (rightIndex + 1) % punchRightImages.length;
