@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>くしゃまるくんアプリ</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: black;
+      overflow: hidden;
+      touch-action: manipulation;
+    }
+    #container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+    }
+    #character, #overlay {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    #overlay {
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <img id="character" src="punch_right.PNG" />
+    <img id="overlay" />
+  </div>
+
+  <audio id="punchSound" src="punch.mp3" preload="auto"></audio>
+  <audio id="explosionSound" src="explosion.mp3" preload="auto"></audio>
+  <audio id="clearSound" src="clear.mp3" preload="auto"></audio>
+
+  <script>
+    const character = document.getElementById('character');
+    const overlay = document.getElementById('overlay');
+    const punchSound = document.getElementById('punchSound');
+    const explosionSound = document.getElementById('explosionSound');
+    const clearSound = document.getElementById('clearSound');
+
+    const punchImages = ['punch_right.PNG', 'punch_left.PNG'];
+    const cracks = ['crack_1.PNG', 'crack_2.PNG', 'crack_3.PNG'];
+
+    let punchCount = 0;
+    let punchToggle = 0;
+    let phase = 0;
+
+    document.getElementById('container').addEventListener('click', () => {
+      if (phase >= 5) return;
+
+      character.src = punchImages[punchToggle];
+      punchToggle = 1 - punchToggle;
+
+      punchSound.currentTime = 0;
+      punchSound.play();
+
+      punchCount++;
+
+      if (punchCount === 3 || punchCount === 6 || punchCount === 9) {
+        phase++;
+        overlay.src = cracks[phase - 1];
+      }
+
+      if (punchCount === 12) {
+        phase = 4;
+        overlay.src = 'explosion.PNG';
+        explosionSound.play();
+      }
+
+      if (punchCount === 13) {
+        phase = 5;
+        character.style.display = 'none';
+        overlay.src = 'clear.PNG';
+        clearSound.play();
+      }
+    });
+  </script>
+</body>
+</html>
