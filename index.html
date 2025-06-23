@@ -40,9 +40,11 @@
     const clearImage = "clear.PNG";
     const restartImage = "restart.PNG";
     const startImage = "start.PNG";
+
     const startSound = "start.mp3";
     const explosionSound = "explosion.mp3";
     const clearSound = "clear.mp3";
+
     const totalPunches = 34;
 
     let count = 0;
@@ -53,9 +55,9 @@
     let gameStarted = false;
     let isExplosionPlaying = false;
     let isClearShown = false;
-    let isRestartMode = false;
+    let isRestartReady = false;
 
-    // プリロード
+    // 画像プリロード
     const preloadImages = [
       startImage, clearImage, explosionImage, restartImage,
       ...crackImages, ...punchRightImages, ...punchLeftImages
@@ -70,7 +72,7 @@
     }
 
     function playPunchSound() {
-      if (isExplosionPlaying || isClearShown) return;
+      if (isExplosionPlaying || isClearShown || isRestartReady) return;
       const file = punchSEs[Math.floor(Math.random() * punchSEs.length)];
       const audio = new Audio(file);
       audio.play().catch(() => {});
@@ -90,20 +92,19 @@
       rightIndex = 0;
       leftIndex = 0;
       isCrackTime = false;
-      gameStarted = false;
       isExplosionPlaying = false;
       isClearShown = false;
-      isRestartMode = false;
+      isRestartReady = false;
     }
 
     function handleClick() {
-      // 再スタート
-      if (isRestartMode) {
+      if (isRestartReady) {
         image.classList.add("hidden");
         setTimeout(() => {
+          resetGame();
           showImage(startImage);
           image.classList.remove("hidden");
-          resetGame();
+          gameStarted = false;
         }, 600);
         return;
       }
@@ -119,13 +120,15 @@
         return;
       }
 
+      if (isExplosionPlaying) return;
+
       if (count === 34 && !isClearShown) {
         isClearShown = true;
         showImage(clearImage);
         playFixedSound(clearSound, () => {
           setTimeout(() => {
             showImage(restartImage);
-            isRestartMode = true;
+            isRestartReady = true;
           }, 3000);
         });
         count++;
@@ -142,10 +145,11 @@
       if (count === 33) {
         isExplosionPlaying = true;
         showImage(explosionImage);
-        playFixedSound(explosionSound, () => {
+        playFixedSound(explosionSound);
+        setTimeout(() => {
           isExplosionPlaying = false;
-        });
-        count++;
+          count++;
+        }, 2000);
         return;
       }
 
@@ -166,7 +170,6 @@
         return;
       }
 
-      // パンチ交互表示
       if (isRight) {
         showImage(punchRightImages[rightIndex]);
         rightIndex = (rightIndex + 1) % punchRightImages.length;
