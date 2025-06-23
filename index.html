@@ -1,62 +1,107 @@
-let tapCount = 0;
-let canTap = true;
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>くしゃまるくんアプリ</title>
+  <style>
+    body {
+      text-align: center;
+      font-family: sans-serif;
+      background: #fff;
+    }
+    #mainImage, #overlayImage {
+      width: 300px;
+      height: auto;
+    }
+    #overlayImage {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 300px;
+      height: auto;
+      pointer-events: none;
+      display: none;
+    }
+    #container {
+      position: relative;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+  <h1>くしゃまるくん</h1>
+  <div id="container">
+    <img id="mainImage" src="right.png" alt="main">
+    <img id="overlayImage" src="" alt="crack">
+  </div>
+  <br>
+  <button id="punchButton">パンチ！</button>
 
-const punchImages = ['right.png', 'left.png'];
-const crackImages = ['crack1.png', 'crack2.png', 'crack3.png'];
+  <script>
+    let tapCount = 0;
+    let canTap = true;
 
-document.getElementById('punchButton').addEventListener('click', () => {
-  if (!canTap) return;
-  tapCount++;
+    const punchImages = ['right.png', 'left.png'];
+    const crackImages = ['crack1.png', 'crack2.png', 'crack3.png'];
 
-  if (tapCount >= 1 && tapCount <= 10) {
-    document.getElementById('mainImage').src = punchImages[(tapCount - 1) % 2];
-    new Audio('punch.mp3').play();
-  }
+    document.getElementById('punchButton').addEventListener('click', () => {
+      if (!canTap) return;
+      tapCount++;
 
-  else if (tapCount === 11) {
-    document.getElementById('overlayImage').src = crackImages[0];
-    document.getElementById('overlayImage').style.display = 'block';
-    new Audio('punch.mp3').play();
-  }
+      const mainImage = document.getElementById('mainImage');
+      const overlayImage = document.getElementById('overlayImage');
 
-  else if (tapCount >= 12 && tapCount <= 21) {
-    document.getElementById('mainImage').src = punchImages[(tapCount - 12) % 2];
-    new Audio('punch.mp3').play();
-  }
+      if (tapCount >= 1 && tapCount <= 10) {
+        mainImage.src = punchImages[(tapCount - 1) % 2];
+        new Audio('punch.mp3').play();
+      }
 
-  else if (tapCount === 22) {
-    document.getElementById('overlayImage').src = crackImages[1];
-    document.getElementById('overlayImage').style.display = 'block';
-    new Audio('punch.mp3').play();
-  }
+      else if (tapCount === 11) {
+        overlayImage.src = crackImages[0];
+        overlayImage.style.display = 'block';
+        new Audio('punch.mp3').play();
+      }
 
-  else if (tapCount >= 23 && tapCount <= 32) {
-    document.getElementById('mainImage').src = punchImages[(tapCount - 23) % 2];
-    new Audio('punch.mp3').play();
-  }
+      else if (tapCount >= 12 && tapCount <= 21) {
+        mainImage.src = punchImages[(tapCount - 12) % 2];
+        new Audio('punch.mp3').play();
+      }
 
-  else if (tapCount === 33) {
-    document.getElementById('overlayImage').src = crackImages[2];
-    document.getElementById('overlayImage').style.display = 'block';
-    new Audio('punch.mp3').play();
-  }
+      else if (tapCount === 22) {
+        overlayImage.src = crackImages[1];
+        overlayImage.style.display = 'block';
+        new Audio('punch.mp3').play();
+      }
 
-  else if (tapCount === 34) {
-    canTap = false; // タップ禁止
-    document.getElementById('mainImage').src = 'explosion.png';
-    const explosionSE = new Audio('explosion.mp3');
-    explosionSE.play();
+      else if (tapCount >= 23 && tapCount <= 32) {
+        mainImage.src = punchImages[(tapCount - 23) % 2];
+        new Audio('punch.mp3').play();
+      }
 
-    // SEの長さを確実に待つため、onendedで処理を続ける
-    explosionSE.addEventListener('ended', () => {
-      setTimeout(() => {
-        canTap = true; // 2秒待ってからタップ再開
-      }, 2000);
+      else if (tapCount === 33) {
+        overlayImage.src = crackImages[2];
+        overlayImage.style.display = 'block';
+        new Audio('punch.mp3').play();
+      }
+
+      else if (tapCount === 34) {
+        canTap = false;
+        mainImage.src = 'explosion.png';
+        const explosionSE = new Audio('explosion.mp3');
+        explosionSE.play();
+
+        explosionSE.addEventListener('ended', () => {
+          setTimeout(() => {
+            canTap = true;
+          }, 2000); // 爆発SE終了後 +2秒
+        });
+      }
+
+      else if (tapCount === 35) {
+        mainImage.src = 'sukkiri.png';
+        new Audio('sukkiri.mp3').play();
+      }
     });
-  }
-
-  else if (tapCount === 35) {
-    document.getElementById('mainImage').src = 'sukkiri.png';
-    new Audio('sukkiri.mp3').play();
-  }
-});
+  </script>
+</body>
+</html>
