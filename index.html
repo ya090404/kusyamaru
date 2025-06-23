@@ -1,107 +1,88 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>くしゃまるくんアプリ</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>くしゃまるくんパンチ</title>
   <style>
     body {
-      text-align: center;
-      font-family: sans-serif;
-      background: #fff;
+      margin: 0;
+      background: black;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
     }
-    #mainImage, #overlayImage {
-      width: 300px;
+    #image {
+      width: 100%;
       height: auto;
-    }
-    #overlayImage {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 300px;
-      height: auto;
-      pointer-events: none;
-      display: none;
-    }
-    #container {
-      position: relative;
-      display: inline-block;
+      max-width: 500px;
+      image-rendering: pixelated;
     }
   </style>
 </head>
 <body>
-  <h1>くしゃまるくん</h1>
-  <div id="container">
-    <img id="mainImage" src="punch_right.PNG" alt="main">
-    <img id="overlayImage" src="" alt="crack">
-  </div>
-  <br>
-  <button id="punchButton">パンチ！</button>
-
+  <img id="image" src="punch_right.PNG" alt="くしゃまるくん"/>
   <script>
-    let tapCount = 0;
-    let canTap = true;
+    const image = document.getElementById("image");
+    const punchSrc = "punch.mp3";
+    const explosionSrc = "explosion.mp3";
+    const clearSrc = "clear.mp3";
 
-    const punchImages = ['punch_right.PNG', 'punch_left.PNG'];
-    const crackImages = ['crack_1.PNG', 'crack_2.PNG', 'crack_3.PNG'];
+    const crackImages = ["crack_1.PNG", "crack_2.PNG", "crack_3.PNG"];
+    const explosionImage = "explosion.PNG";
+    const clearImage = "clear.PNG";
+    const totalPunches = 34; // ← すっきりを34回目に表示する
 
-    document.getElementById('punchButton').addEventListener('click', () => {
-      if (!canTap) return;
-      tapCount++;
+    let count = 0;
+    let isRight = true;
 
-      const mainImage = document.getElementById('mainImage');
-      const overlayImage = document.getElementById('overlayImage');
+    function playSound(src) {
+      const audio = new Audio(src);
+      audio.currentTime = 0;
+      audio.play().catch(() => {});
+    }
 
-      if (tapCount >= 1 && tapCount <= 10) {
-        mainImage.src = punchImages[(tapCount - 1) % 2];
-        new Audio('punch.mp3').play();
+    function showImage(src) {
+      image.src = src;
+    }
+
+    function handleClick() {
+      if (count >= totalPunches) return;
+
+      count++;
+
+      if (count === 34) {
+        showImage(clearImage);
+        playSound(clearSrc);
+        return;
       }
 
-      else if (tapCount === 11) {
-        overlayImage.src = crackImages[0];
-        overlayImage.style.display = 'block';
-        new Audio('punch.mp3').play();
+      if (count === 33) {
+        showImage(explosionImage);
+        playSound(explosionSrc);
+        return;
       }
 
-      else if (tapCount >= 12 && tapCount <= 21) {
-        mainImage.src = punchImages[(tapCount - 12) % 2];
-        new Audio('punch.mp3').play();
+      if (count % 10 === 0) {
+        const index = Math.floor(count / 10) - 1;
+        if (crackImages[index]) {
+          showImage(crackImages[index]);
+          playSound(punchSrc);
+        }
+        return;
       }
 
-      else if (tapCount === 22) {
-        overlayImage.src = crackImages[1];
-        overlayImage.style.display = 'block';
-        new Audio('punch.mp3').play();
+      if (isRight) {
+        showImage("punch_right.PNG");
+      } else {
+        showImage("punch_left.PNG");
       }
+      isRight = !isRight;
+      playSound(punchSrc);
+    }
 
-      else if (tapCount >= 23 && tapCount <= 32) {
-        mainImage.src = punchImages[(tapCount - 23) % 2];
-        new Audio('punch.mp3').play();
-      }
-
-      else if (tapCount === 33) {
-        overlayImage.src = crackImages[2];
-        overlayImage.style.display = 'block';
-        new Audio('punch.mp3').play();
-      }
-
-      else if (tapCount === 34) {
-        canTap = false;
-        mainImage.src = 'explosion.PNG';
-        const explosionSE = new Audio('explosion.mp3');
-        explosionSE.play();
-
-        explosionSE.addEventListener('ended', () => {
-          setTimeout(() => {
-            canTap = true;
-          }, 2000);
-        });
-      }
-
-      else if (tapCount === 35) {
-        mainImage.src = 'clear.PNG';
-        new Audio('clear.mp3').play();
-      }
-    });
+    image.addEventListener("click", handleClick);
   </script>
 </body>
 </html>
