@@ -25,7 +25,10 @@
   <img id="image" src="punch_right.PNG" alt="くしゃまるくん"/>
   <script>
     const image = document.getElementById("image");
-    const punchSounds = ["punch.mp3", "punch.mp3"]; // 右・左どちらも同じSE
+    const punchSrc = "punch.mp3";
+    const explosionSrc = "explosion.mp3";
+    const clearSrc = "clear.mp3";
+
     const crackImages = ["crack_1.PNG", "crack_2.PNG", "crack_3.PNG"];
     const explosionImage = "explosion.PNG";
     const clearImage = "clear.PNG";
@@ -33,6 +36,7 @@
 
     let count = 0;
     let isRight = true;
+    let finished = false;
 
     function playSound(src) {
       const audio = new Audio(src);
@@ -45,38 +49,43 @@
     }
 
     function handleClick() {
-      if (count >= totalPunches) return;
+      if (finished) return;
 
       count++;
 
-      if (count === 33) {
+      // 最後のパンチ（33回目）：爆発→即すっきり
+      if (count === totalPunches) {
         showImage(explosionImage);
-        playSound("explosion.mp3");
+        playSound(explosionSrc);
+
+        // すぐすっきり画像に切り替え
         setTimeout(() => {
           showImage(clearImage);
-          playSound("clear.mp3");
-        }, 1000); // 1秒後にすっきり画像表示
+          playSound(clearSrc);
+        }, 100); // 100msだけ爆発を見せる
+
+        finished = true;
         return;
       }
 
-      // 毎10回ごとにヒビ画像を表示
+      // 10, 20, 30回目にヒビ画像＋パンチSE
       if (count % 10 === 0) {
-        const index = count / 10 - 1;
+        const index = Math.floor(count / 10) - 1;
         if (crackImages[index]) {
           showImage(crackImages[index]);
-          playSound("punch.mp3");
+          playSound(punchSrc);
         }
         return;
       }
 
-      // 右左パンチ交互
+      // 通常パンチ（左右交互）
       if (isRight) {
         showImage("punch_right.PNG");
       } else {
         showImage("punch_left.PNG");
       }
       isRight = !isRight;
-      playSound("punch.mp3");
+      playSound(punchSrc);
     }
 
     image.addEventListener("click", handleClick);
