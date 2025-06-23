@@ -26,12 +26,12 @@
   <script>
     const image = document.getElementById("image");
 
-    // 🔊 音声ファイル
+    // 音声ファイル
     const punchSrc = "punch.mp3";
     const explosionSrc = "explosion.mp3";
     const clearSrc = "clear.mp3";
 
-    // 🖼️ 画像ファイル
+    // 画像ファイル
     const crackImages = ["crack_1.PNG", "crack_2.PNG", "crack_3.PNG"];
     const explosionImage = "explosion.PNG";
     const clearImage = "clear.PNG";
@@ -40,18 +40,15 @@
     let count = 0;
     let isRight = true;
     let allowNextTap = true;
-    let justShowedCrack = false;
 
-    // 📥 画像・音声を事前に読み込む
+    // 🔁 画像・音声をプリロード
     function preloadResources() {
       const images = [
         "punch_right.PNG",
         "punch_left.PNG",
-        "crack_1.PNG",
-        "crack_2.PNG",
-        "crack_3.PNG",
-        "explosion.PNG",
-        "clear.PNG"
+        ...crackImages,
+        explosionImage,
+        clearImage
       ];
       images.forEach(src => {
         const img = new Image();
@@ -64,7 +61,7 @@
       });
     }
 
-    preloadResources(); // 🔁 一度だけ呼び出してプリロード
+    preloadResources();
 
     function playSound(src) {
       const audio = new Audio(src);
@@ -79,14 +76,6 @@
     function handleClick() {
       if (!allowNextTap || count >= totalPunches) return;
 
-      // 🎉 すっきり（34発目）
-      if (count === 33) {
-        count++;
-        showImage(clearImage);
-        playSound(clearSrc);
-        return;
-      }
-
       // 💥 爆発（33発目前）
       if (count === 32) {
         allowNextTap = false;
@@ -99,19 +88,20 @@
         return;
       }
 
-      // 🔨 ヒビ演出（10, 20, 30回目）
-      if ((count + 1) % 10 === 0 && count < 30) {
+      // 🎉 すっきり（34発目）
+      if (count === 33) {
+        count++;
+        showImage(clearImage);
+        playSound(clearSrc);
+        return;
+      }
+
+      // 🔨 ヒビ演出（10, 20, 30発目）
+      if ((count + 1) % 10 === 0 && count < 31) {
         count++;
         const index = Math.floor(count / 10);
         showImage(crackImages[index]);
         playSound(punchSrc);
-        justShowedCrack = true;
-        return;
-      }
-
-      // 🛑 ヒビの次のタップではスキップ
-      if (justShowedCrack) {
-        justShowedCrack = false;
         return;
       }
 
