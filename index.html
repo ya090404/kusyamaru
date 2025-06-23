@@ -25,20 +25,46 @@
   <img id="image" src="punch_right.PNG" alt="くしゃまるくん"/>
   <script>
     const image = document.getElementById("image");
+
+    // 🔊 音声ファイル
     const punchSrc = "punch.mp3";
     const explosionSrc = "explosion.mp3";
     const clearSrc = "clear.mp3";
 
+    // 🖼️ 画像ファイル
     const crackImages = ["crack_1.PNG", "crack_2.PNG", "crack_3.PNG"];
     const explosionImage = "explosion.PNG";
     const clearImage = "clear.PNG";
 
     const totalPunches = 34;
-
     let count = 0;
     let isRight = true;
     let allowNextTap = true;
     let justShowedCrack = false;
+
+    // 📥 画像・音声を事前に読み込む
+    function preloadResources() {
+      const images = [
+        "punch_right.PNG",
+        "punch_left.PNG",
+        "crack_1.PNG",
+        "crack_2.PNG",
+        "crack_3.PNG",
+        "explosion.PNG",
+        "clear.PNG"
+      ];
+      images.forEach(src => {
+        const img = new Image();
+        img.src = src;
+      });
+
+      [punchSrc, explosionSrc, clearSrc].forEach(src => {
+        const audio = new Audio();
+        audio.src = src;
+      });
+    }
+
+    preloadResources(); // 🔁 一度だけ呼び出してプリロード
 
     function playSound(src) {
       const audio = new Audio(src);
@@ -53,7 +79,7 @@
     function handleClick() {
       if (!allowNextTap || count >= totalPunches) return;
 
-      // すっきり（34発目）
+      // 🎉 すっきり（34発目）
       if (count === 33) {
         count++;
         showImage(clearImage);
@@ -61,7 +87,7 @@
         return;
       }
 
-      // 爆発（33発目前） ※ヒビのあとに余計なパンチを挟ませない
+      // 💥 爆発（33発目前）
       if (count === 32) {
         allowNextTap = false;
         count++;
@@ -73,7 +99,7 @@
         return;
       }
 
-      // ヒビ演出（10, 20, 30回目）
+      // 🔨 ヒビ演出（10, 20, 30回目）
       if ((count + 1) % 10 === 0 && count < 30) {
         count++;
         const index = Math.floor(count / 10);
@@ -83,13 +109,13 @@
         return;
       }
 
-      // ヒビの直後は1タップだけスキップ（通常パンチを挟まない）
+      // 🛑 ヒビの次のタップではスキップ
       if (justShowedCrack) {
         justShowedCrack = false;
         return;
       }
 
-      // 通常パンチ
+      // 🤜 通常パンチ（左右交互）
       count++;
       showImage(isRight ? "punch_right.PNG" : "punch_left.PNG");
       isRight = !isRight;
