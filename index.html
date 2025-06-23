@@ -49,7 +49,7 @@
     let isExploded = false;
     let gameStarted = false;
 
-    // すべての画像をプリロード
+    // プリロード（← clearImage 忘れず追加済み）
     const preloadImages = [startImage, clearImage, explosionImage, ...crackImages, "punch_right.PNG", "punch_left.PNG"];
     preloadImages.forEach(src => {
       const img = new Image();
@@ -73,12 +73,12 @@
     }
 
     function handleClick() {
+      // スタート画面の処理（1回だけ）
       if (!gameStarted) {
         gameStarted = true;
         playFixedSound(startSound);
-
-        // フェードアウトしてパンチ画面へ
         image.classList.add("hidden");
+
         setTimeout(() => {
           showImage("punch_right.PNG");
           image.classList.remove("hidden");
@@ -86,6 +86,7 @@
         return;
       }
 
+      // ゲーム本編（以下、以前と同一）
       if (count >= totalPunches) return;
 
       if (isCrackTime) {
@@ -100,11 +101,16 @@
         return;
       }
 
-      if (count === 33 || isExploded) {
+      if (isExploded) {
+        count = 34;
+        handleClick();
+        return;
+      }
+
+      if (count === 33) {
         showImage(explosionImage);
         playFixedSound("explosion.mp3");
-        isExploded = false;
-        count++;
+        isExploded = true;
         return;
       }
 
@@ -116,17 +122,14 @@
 
         setTimeout(() => {
           isCrackTime = false;
-
           if (count === 30) {
-            count = 33;
-            isExploded = true;
+            count = 33; // 爆発へ
           } else {
             showImage(isRight ? "punch_right.PNG" : "punch_left.PNG");
             isRight = !isRight;
+            count++;
           }
         }, 400);
-
-        count++;
         return;
       }
 
