@@ -52,7 +52,7 @@
     function handleClick() {
       if (!isClickable || count >= totalPunches) return;
 
-      isClickable = false; // タップクールタイム開始
+      isClickable = false;
       count++;
 
       // すっきり（34回目）
@@ -68,7 +68,7 @@
         playSound(explosionSound);
         setTimeout(() => {
           isClickable = true;
-        }, 2000); // 爆発中は2秒停止
+        }, 2000);
         return;
       }
 
@@ -79,18 +79,15 @@
         playSound(punchSound);
         setTimeout(() => {
           isClickable = true;
-        }, 500); // ヒビだけ0.5秒停止
+        }, 500);
         return;
       }
 
-      // 通常パンチ
+      // パンチ（連打感重視・クールタイムなし）
       showImage(isRight ? "punch_right.PNG" : "punch_left.PNG");
       isRight = !isRight;
       playSound(punchSound);
-
-      setTimeout(() => {
-        isClickable = true;
-      }, 200); // 通常パンチは高速対応（0.2秒）
+      isClickable = true; // ← 即復帰でサクサク連打感
     }
 
     image.addEventListener("click", handleClick);
