@@ -2,185 +2,155 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>ぱんちにゃん</title>
+  <title>ぱんちにゃんCanvas版</title>
   <style>
     body {
       margin: 0;
       background: black;
+      overflow: hidden;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
-      overflow: hidden;
     }
-    #image {
-      width: 100%;
-      height: auto;
-      max-width: 500px;
+    canvas {
       image-rendering: pixelated;
-      transition: opacity 0.6s ease;
-    }
-    .hidden {
-      opacity: 0;
-      pointer-events: none;
     }
   </style>
 </head>
 <body>
-  <img id="image" src="start.PNG" alt="Tap to Start"/>
+  <canvas id="canvas" width="500" height="500"></canvas>
+
   <script>
-    const image = document.getElementById("image");
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
 
-    const punchRightImages = ["punch_right.PNG", "punch_right2.PNG"];
-    const punchLeftImages = ["punch_left.PNG", "punch_left2.PNG"];
-    const punchSEs = ["punch.mp3", "punch2.mp3", "punch3.mp3"];
-    const crackImages = ["crack_1.PNG", "crack_2.PNG", "crack_3.PNG"];
-    const explosionImage = "explosion.PNG";
-    const clearImage = "clear.PNG";
-    const startImage = "start.PNG";
-    const restartImage = "restart.PNG";
-    const startSound = "start.mp3";
-    const explosionSound = "explosion.mp3";
-    const clearSound = "clear.mp3";
-    const totalPunches = 34;
-
-    let count = 0;
-    let isRight = true;
-    let rightIndex = 0;
-    let leftIndex = 0;
-    let isCrackTime = false;
-    let gameStarted = false;
-    let isExplosionPlaying = false;
-    let isClearShown = false;
-    let canRestart = false;
-
-    const preloadImages = [
-      startImage, clearImage, explosionImage, restartImage,
-      ...crackImages, ...punchRightImages, ...punchLeftImages
+    // 画像プリロード
+    const images = {};
+    const imageFiles = [
+      "punch_left.PNG", "punch_right.PNG",
+      "punch_left2.PNG", "punch_right2.PNG",
+      "crack_1.PNG", "crack_2.PNG", "crack_3.PNG",
+      "explosion.PNG", "clear.PNG",
+      "restart.PNG", "start.PNG"
     ];
-    preloadImages.forEach(src => {
+
+    let loadedImages = 0;
+    imageFiles.forEach(name => {
       const img = new Image();
-      img.src = src;
+      img.src = name;
+      img.onload = () => {
+        loadedImages++;
+        if (loadedImages === imageFiles.length) {
+          showStart();
+        }
+      };
+      images[name] = img;
     });
 
-    function showImage(src) {
-      image.src = src;
+    // 音声
+    const sounds = {
+      punch: new Audio("punch.mp3"),
+      explosion: new Audio("explosion.mp3"),
+      clear: new Audio("clear.mp3"),
+      start: new Audio("start.mp3")
+    };
+
+    // 状態管理
+    let punchCount = 0;
+    let punchIndex = 0;
+    let canTap = true;
+
+    function drawImage(name) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(images[name], 0, 0, canvas.width, canvas.height);
     }
 
-    function playPunchSound() {
-      if (isExplosionPlaying || isClearShown) return;
-      const file = punchSEs[Math.floor(Math.random() * punchSEs.length)];
-      const audio = new Audio(file);
-      audio.play().catch(() => {});
+    function playSound(key) {
+      const sound = sounds[key].cloneNode();
+      sound.play();
+      return sound;
     }
 
-    function playFixedSound(src, callback) {
-      const audio = new Audio(src);
-      audio.play().catch(() => {});
-      if (callback) {
-        audio.addEventListener("ended", callback);
+    function showStart() {
+      drawImage("start.PNG");
+      canvas.onclick = () => {
+        playSound("start");
+        canvas.onclick = null;
+        setTimeout(() => {
+          startGame();
+        }, 500);
+      };
+    }
+
+    function startGame() {
+      punchCount = 0;
+      punchIndex = 0;
+      canTap = true;
+      drawPunch();
+      canvas.onclick = onPunch;
+    }
+
+    function drawPunch() {
+      const punchImgs = [
+        "punch_left.PNG", "punch_right.PNG",
+        "punch_left2.PNG", "punch_right2.PNG"
+      ];
+      const img = punchImgs[punchIndex % punchImgs.length];
+      drawImage(img);
+      punchIndex++;
+    }
+
+    function onPunch() {
+      if (!canTap) return;
+
+      punchCount++;
+      playSound("punch");
+      drawPunch();
+
+      if (punchCount === 10) {
+        showCrack("crack_1.PNG");
+      } else if (punchCount === 20) {
+        showCrack("crack_2.PNG");
+      } else if (punchCount === 30) {
+        showCrack("crack_3.PNG", () => {
+          showExplosion();
+        });
       }
     }
 
-    function resetGame() {
-      count = 0;
-      isRight = true;
-      rightIndex = 0;
-      leftIndex = 0;
-      isCrackTime = false;
-      gameStarted = false;
-      isExplosionPlaying = false;
-      isClearShown = false;
-      canRestart = false;
-
-      image.classList.add("hidden");
+    function showCrack(name, callback) {
+      canTap = false;
+      drawImage(name);
       setTimeout(() => {
-        showImage(startImage);
-        image.classList.remove("hidden");
+        canTap = true;
+        if (callback) callback();
       }, 600);
     }
 
-    function handleClick() {
-      if (!gameStarted) {
-        gameStarted = true;
-        playFixedSound(startSound);
-        image.classList.add("hidden");
-        setTimeout(() => {
-          showImage("punch_right.PNG");
-          image.classList.remove("hidden");
-        }, 600);
-        return;
-      }
-
-      if (canRestart) {
-        resetGame();
-        return;
-      }
-
-      if (count === 34 && !isClearShown) {
-        isClearShown = true;
-        showImage(clearImage);
-        playFixedSound(clearSound, () => {
-          setTimeout(() => {
-            showImage(restartImage);
-            canRestart = true;
-          }, 1500);
-        });
-        count++;
-        return;
-      }
-
-      if (count >= totalPunches) return;
-
-      if (isCrackTime) {
-        playPunchSound();
-        return;
-      }
-
-      if (count === 33) {
-        isExplosionPlaying = true;
-        showImage(explosionImage);
-        playFixedSound(explosionSound, () => {
-          setTimeout(() => {
-            isExplosionPlaying = false;
-            count++;
-          }, 3000); // 爆発を長めに視認
-        });
-        count++;
-        return;
-      }
-
-      if ([10, 20, 30].includes(count)) {
-        const index = count / 10 - 1;
-        isCrackTime = true;
-        showImage(crackImages[index]);
-        playPunchSound();
-        setTimeout(() => {
-          isCrackTime = false;
-          if (count === 30) {
-            count = 32;
-          } else {
-            showImage(isRight ? punchRightImages[rightIndex] : punchLeftImages[leftIndex]);
-          }
-        }, 600);
-        count++;
-        return;
-      }
-
-      if (isRight) {
-        showImage(punchRightImages[rightIndex]);
-        rightIndex = (rightIndex + 1) % punchRightImages.length;
-      } else {
-        showImage(punchLeftImages[leftIndex]);
-        leftIndex = (leftIndex + 1) % punchLeftImages.length;
-      }
-      isRight = !isRight;
-      playPunchSound();
-      count++;
+    function showExplosion() {
+      canTap = false;
+      drawImage("explosion.PNG");
+      const sound = playSound("explosion");
+      sound.onended = () => {
+        showClear();
+      };
     }
 
-    image.addEventListener("click", handleClick);
+    function showClear() {
+      drawImage("clear.PNG");
+      playSound("clear");
+      setTimeout(() => {
+        showRestart();
+      }, 3000);
+    }
+
+    function showRestart() {
+      drawImage("restart.PNG");
+      canvas.onclick = () => {
+        showStart();
+      };
+    }
   </script>
 </body>
 </html>
