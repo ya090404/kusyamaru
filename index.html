@@ -32,11 +32,13 @@
     const crackImages = ["crack_1.PNG", "crack_2.PNG", "crack_3.PNG"];
     const explosionImage = "explosion.PNG";
     const clearImage = "clear.PNG";
+
     const totalPunches = 34;
 
     let count = 0;
     let isRight = true;
     let allowNextTap = true;
+    let justShowedCrack = false;
 
     function playSound(src) {
       const audio = new Audio(src);
@@ -51,18 +53,6 @@
     function handleClick() {
       if (!allowNextTap || count >= totalPunches) return;
 
-      // 爆発（33発目）
-      if (count === 32) {
-        allowNextTap = false;
-        count++;
-        showImage(explosionImage);
-        playSound(explosionSrc);
-        setTimeout(() => {
-          allowNextTap = true;
-        }, 2000); // 2秒間待機
-        return;
-      }
-
       // すっきり（34発目）
       if (count === 33) {
         count++;
@@ -71,24 +61,37 @@
         return;
       }
 
-      // ヒビ演出（10, 20, 30発目）
-      if ((count + 1) % 10 === 0 && count < 30) {
+      // 爆発（33発目前） ※ヒビのあとに余計なパンチを挟ませない
+      if (count === 32) {
+        allowNextTap = false;
         count++;
-        const index = Math.floor(count / 10) - 1;
-        if (crackImages[index]) {
-          showImage(crackImages[index]);
-          playSound(punchSrc);
-        }
+        showImage(explosionImage);
+        playSound(explosionSrc);
+        setTimeout(() => {
+          allowNextTap = true;
+        }, 2000);
         return;
       }
 
-      // 通常パンチ（左右交互）
-      count++;
-      if (isRight) {
-        showImage("punch_right.PNG");
-      } else {
-        showImage("punch_left.PNG");
+      // ヒビ演出（10, 20, 30回目）
+      if ((count + 1) % 10 === 0 && count < 30) {
+        count++;
+        const index = Math.floor(count / 10);
+        showImage(crackImages[index]);
+        playSound(punchSrc);
+        justShowedCrack = true;
+        return;
       }
+
+      // ヒビの直後は1タップだけスキップ（通常パンチを挟まない）
+      if (justShowedCrack) {
+        justShowedCrack = false;
+        return;
+      }
+
+      // 通常パンチ
+      count++;
+      showImage(isRight ? "punch_right.PNG" : "punch_left.PNG");
       isRight = !isRight;
       playSound(punchSrc);
     }
