@@ -125,7 +125,7 @@
           setTimeout(() => {
             showImage(restartImage);
             canRestart = true;
-          }, 1500); // ← すっきり後の待機時間を1.5秒に短縮
+          }, 1500); // ← すっきり後の待機時間
         });
         count++;
         return;
@@ -145,7 +145,7 @@
           setTimeout(() => {
             isExplosionPlaying = false;
             count++;
-          }, 1000); // ← 爆発後1秒視認延長
+          }, 3000); // ← 爆発後の視認時間を3秒に延長
         });
         count++;
         return;
