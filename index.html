@@ -26,9 +26,14 @@
   <script>
     const image = document.getElementById("image");
 
-    // SEたち
-    const punchSounds = [new Audio("punch.mp3"), new Audio("punch.mp3")];
+    // SEたち（3つをローテーション）
+    const punchSounds = [
+      new Audio("punch.mp3"),
+      new Audio("punch2.mp3"),
+      new Audio("punch3.mp3")
+    ];
     let punchSoundIndex = 0;
+
     const explosionSound = new Audio("explosion.mp3");
     const clearSound = new Audio("clear.mp3");
 
@@ -65,14 +70,12 @@
       isClickable = false;
       count++;
 
-      // すっきり（34回目）
       if (count === 34) {
         showImage(clearImage);
         playSound(clearSound);
         return;
       }
 
-      // 爆発（33回目）
       if (count === 33) {
         showImage(explosionImage);
         playSound(explosionSound);
@@ -82,7 +85,6 @@
         return;
       }
 
-      // ヒビ演出（10・20・30回目）
       if (count % 10 === 0 && count <= 30) {
         const index = count / 10 - 1;
         showImage(crackImages[index]);
