@@ -32,11 +32,10 @@
     const crackImages = ["crack_1.PNG", "crack_2.PNG", "crack_3.PNG"];
     const explosionImage = "explosion.PNG";
     const clearImage = "clear.PNG";
-    const totalPunches = 33;
+    const totalPunches = 34; // ← すっきりを34回目に表示する
 
     let count = 0;
     let isRight = true;
-    let finished = false;
 
     function playSound(src) {
       const audio = new Audio(src);
@@ -49,26 +48,22 @@
     }
 
     function handleClick() {
-      if (finished) return;
+      if (count >= totalPunches) return;
 
       count++;
 
-      // 最後のパンチ（33回目）：爆発→即すっきり
-      if (count === totalPunches) {
-        showImage(explosionImage);
-        playSound(explosionSrc);
-
-        // すぐすっきり画像に切り替え
-        setTimeout(() => {
-          showImage(clearImage);
-          playSound(clearSrc);
-        }, 100); // 100msだけ爆発を見せる
-
-        finished = true;
+      if (count === 34) {
+        showImage(clearImage);
+        playSound(clearSrc);
         return;
       }
 
-      // 10, 20, 30回目にヒビ画像＋パンチSE
+      if (count === 33) {
+        showImage(explosionImage);
+        playSound(explosionSrc);
+        return;
+      }
+
       if (count % 10 === 0) {
         const index = Math.floor(count / 10) - 1;
         if (crackImages[index]) {
@@ -78,7 +73,6 @@
         return;
       }
 
-      // 通常パンチ（左右交互）
       if (isRight) {
         showImage("punch_right.PNG");
       } else {
