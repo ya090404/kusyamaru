@@ -45,13 +45,22 @@
 
     let count = 0;
     let isRight = true;
+    let rightIndex = 0;
+    let leftIndex = 0;
     let isCrackTime = false;
-    let isExploding = false;
-    let isClearing = false;
+    let isExploded = false;
     let gameStarted = false;
 
+    const punchRightImages = ["punch_right.PNG", "punch_right2.PNG"];
+    const punchLeftImages = ["punch_left.PNG", "punch_left2.PNG"];
+
     // プリロード
-    const preloadImages = [startImage, clearImage, explosionImage, ...crackImages, "punch_right.PNG", "punch_left.PNG"];
+    const preloadImages = [
+      startImage, clearImage, explosionImage,
+      ...crackImages,
+      ...punchRightImages,
+      ...punchLeftImages
+    ];
     preloadImages.forEach(src => {
       const img = new Image();
       img.src = src;
@@ -63,17 +72,13 @@
     }
 
     function playPunchSound() {
-      if (isExploding || isClearing) return; // ← パンチ音をブロック
       const file = punchFiles[Math.floor(Math.random() * punchFiles.length)];
       const audio = new Audio(file);
       audio.play().catch(() => {});
     }
 
-    function playFixedSound(src, onEnd) {
+    function playFixedSound(src) {
       const audio = new Audio(src);
-      if (onEnd) {
-        audio.addEventListener("ended", onEnd);
-      }
       audio.play().catch(() => {});
     }
 
@@ -82,7 +87,6 @@
         gameStarted = true;
         playFixedSound(startSound);
         image.classList.add("hidden");
-
         setTimeout(() => {
           showImage("punch_right.PNG");
           image.classList.remove("hidden");
@@ -90,27 +94,13 @@
         return;
       }
 
-      if (count === 34) {
-        if (!isClearing) {
-          isClearing = true;
-          showImage(clearImage);
-          playFixedSound("clear.mp3");
-        }
-        return;
-      }
+      if (count >= totalPunches) return;
 
-      if (count === 33 && !isExploding) {
-        isExploding = true;
-        showImage(explosionImage);
-        playFixedSound("explosion.mp3", () => {
-          isExploding = false;
-          count++;
-        });
-        return;
-      }
+      // 爆発 or スッキリ時はパンチをブロック
+      if (count === 33 || count === 34) return;
 
-      if (count > totalPunches || isCrackTime || isExploding || isClearing) {
-        playPunchSound(); // 音だけ鳴らす（ただし爆発・スッキリ中は鳴らないよう上で制御）
+      if (isCrackTime) {
+        playPunchSound();
         return;
       }
 
@@ -123,20 +113,46 @@
         setTimeout(() => {
           isCrackTime = false;
           if (count === 30) {
-            count = 33; // 次回クリックで爆発へ
+            count = 32;
+            isExploded = true;
           } else {
-            showImage(isRight ? "punch_right.PNG" : "punch_left.PNG");
-            isRight = !isRight;
-            count++;
+            showNextPunch();
           }
         }, 600);
+
+        count++;
         return;
       }
 
-      showImage(isRight ? "punch_right.PNG" : "punch_left.PNG");
-      isRight = !isRight;
+      if (isExploded && count === 33) {
+        showImage(explosionImage);
+        playFixedSound("explosion.mp3");
+        isExploded = false;
+        count++;
+        return;
+      }
+
+      if (count === 34) {
+        showImage(clearImage);
+        playFixedSound("clear.mp3");
+        count++;
+        return;
+      }
+
+      showNextPunch();
       playPunchSound();
       count++;
+    }
+
+    function showNextPunch() {
+      if (isRight) {
+        showImage(punchRightImages[rightIndex % punchRightImages.length]);
+        rightIndex++;
+      } else {
+        showImage(punchLeftImages[leftIndex % punchLeftImages.length]);
+        leftIndex++;
+      }
+      isRight = !isRight;
     }
 
     image.addEventListener("click", handleClick);
