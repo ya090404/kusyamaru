@@ -26,13 +26,16 @@
   <script>
     const image = document.getElementById("image");
 
-    // SEたち（3つをローテーション）
-    const punchSounds = [
-      new Audio("punch.mp3"),
-      new Audio("punch2.mp3"),
-      new Audio("punch3.mp3")
-    ];
-    let punchSoundIndex = 0;
+    // punch.mp3, punch2.mp3, punch3.mp3 を交互にプリロードして10個作る
+    const punchFiles = ["punch.mp3", "punch2.mp3", "punch3.mp3"];
+    const punchSounds = [];
+    for (let i = 0; i < 10; i++) {
+      const file = punchFiles[i % punchFiles.length];
+      const audio = new Audio(file);
+      audio.preload = "auto";
+      punchSounds.push(audio);
+    }
+    let punchIndex = 0;
 
     const explosionSound = new Audio("explosion.mp3");
     const clearSound = new Audio("clear.mp3");
@@ -47,11 +50,11 @@
     let isClickable = true;
 
     function playPunchSound() {
-      const sound = punchSounds[punchSoundIndex];
+      const sound = punchSounds[punchIndex];
       sound.pause();
       sound.currentTime = 0;
       sound.play().catch(() => {});
-      punchSoundIndex = (punchSoundIndex + 1) % punchSounds.length;
+      punchIndex = (punchIndex + 1) % punchSounds.length;
     }
 
     function playSound(audio) {
@@ -91,7 +94,7 @@
         playPunchSound();
         setTimeout(() => {
           isClickable = true;
-        }, 500);
+        }, 300);
         return;
       }
 
