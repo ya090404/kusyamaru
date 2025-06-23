@@ -26,20 +26,7 @@
   <script>
     const image = document.getElementById("image");
 
-    // punch.mp3, punch2.mp3, punch3.mp3 を交互にプリロードして10個作る
     const punchFiles = ["punch.mp3", "punch2.mp3", "punch3.mp3"];
-    const punchSounds = [];
-    for (let i = 0; i < 10; i++) {
-      const file = punchFiles[i % punchFiles.length];
-      const audio = new Audio(file);
-      audio.preload = "auto";
-      punchSounds.push(audio);
-    }
-    let punchIndex = 0;
-
-    const explosionSound = new Audio("explosion.mp3");
-    const clearSound = new Audio("clear.mp3");
-
     const crackImages = ["crack_1.PNG", "crack_2.PNG", "crack_3.PNG"];
     const explosionImage = "explosion.PNG";
     const clearImage = "clear.PNG";
@@ -50,16 +37,13 @@
     let isClickable = true;
 
     function playPunchSound() {
-      const sound = punchSounds[punchIndex];
-      sound.pause();
-      sound.currentTime = 0;
-      sound.play().catch(() => {});
-      punchIndex = (punchIndex + 1) % punchSounds.length;
+      const file = punchFiles[Math.floor(Math.random() * punchFiles.length)];
+      const audio = new Audio(file);
+      audio.play().catch(() => {});
     }
 
-    function playSound(audio) {
-      audio.pause();
-      audio.currentTime = 0;
+    function playFixedSound(src) {
+      const audio = new Audio(src);
       audio.play().catch(() => {});
     }
 
@@ -75,13 +59,13 @@
 
       if (count === 34) {
         showImage(clearImage);
-        playSound(clearSound);
+        playFixedSound("clear.mp3");
         return;
       }
 
       if (count === 33) {
         showImage(explosionImage);
-        playSound(explosionSound);
+        playFixedSound("explosion.mp3");
         setTimeout(() => {
           isClickable = true;
         }, 2000);
@@ -94,7 +78,7 @@
         playPunchSound();
         setTimeout(() => {
           isClickable = true;
-        }, 300);
+        }, 200);
         return;
       }
 
