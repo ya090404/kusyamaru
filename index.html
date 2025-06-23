@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>くしゃまるくんパンチ</title>
+  <title>ぱんちにゃん</title>
   <style>
     body {
       margin: 0;
@@ -125,7 +125,7 @@
           setTimeout(() => {
             showImage(restartImage);
             canRestart = true;
-          }, 1500); // ← すっきり後の待機時間
+          }, 1500);
         });
         count++;
         return;
@@ -145,7 +145,7 @@
           setTimeout(() => {
             isExplosionPlaying = false;
             count++;
-          }, 3000); // ← 爆発後の視認時間を3秒に延長
+          }, 3000); // 爆発を長めに視認
         });
         count++;
         return;
