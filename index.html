@@ -38,13 +38,11 @@
     const crackImages = ["crack_1.PNG", "crack_2.PNG", "crack_3.PNG"];
     const explosionImage = "explosion.PNG";
     const clearImage = "clear.PNG";
-    const restartImage = "restart.PNG";
     const startImage = "start.PNG";
-
+    const restartImage = "restart.PNG";
     const startSound = "start.mp3";
     const explosionSound = "explosion.mp3";
     const clearSound = "clear.mp3";
-
     const totalPunches = 34;
 
     let count = 0;
@@ -55,9 +53,8 @@
     let gameStarted = false;
     let isExplosionPlaying = false;
     let isClearShown = false;
-    let isRestartReady = false;
+    let canRestart = false;
 
-    // 画像プリロード
     const preloadImages = [
       startImage, clearImage, explosionImage, restartImage,
       ...crackImages, ...punchRightImages, ...punchLeftImages
@@ -72,7 +69,7 @@
     }
 
     function playPunchSound() {
-      if (isExplosionPlaying || isClearShown || isRestartReady) return;
+      if (isExplosionPlaying || isClearShown) return;
       const file = punchSEs[Math.floor(Math.random() * punchSEs.length)];
       const audio = new Audio(file);
       audio.play().catch(() => {});
@@ -92,23 +89,19 @@
       rightIndex = 0;
       leftIndex = 0;
       isCrackTime = false;
+      gameStarted = false;
       isExplosionPlaying = false;
       isClearShown = false;
-      isRestartReady = false;
+      canRestart = false;
+
+      image.classList.add("hidden");
+      setTimeout(() => {
+        showImage(startImage);
+        image.classList.remove("hidden");
+      }, 600);
     }
 
     function handleClick() {
-      if (isRestartReady) {
-        image.classList.add("hidden");
-        setTimeout(() => {
-          resetGame();
-          showImage(startImage);
-          image.classList.remove("hidden");
-          gameStarted = false;
-        }, 600);
-        return;
-      }
-
       if (!gameStarted) {
         gameStarted = true;
         playFixedSound(startSound);
@@ -120,7 +113,10 @@
         return;
       }
 
-      if (isExplosionPlaying) return;
+      if (canRestart) {
+        resetGame();
+        return;
+      }
 
       if (count === 34 && !isClearShown) {
         isClearShown = true;
@@ -128,8 +124,8 @@
         playFixedSound(clearSound, () => {
           setTimeout(() => {
             showImage(restartImage);
-            isRestartReady = true;
-          }, 3000);
+            canRestart = true;
+          }, 1500); // ← すっきり後の待機時間を1.5秒に短縮
         });
         count++;
         return;
@@ -145,11 +141,13 @@
       if (count === 33) {
         isExplosionPlaying = true;
         showImage(explosionImage);
-        playFixedSound(explosionSound);
-        setTimeout(() => {
-          isExplosionPlaying = false;
-          count++;
-        }, 2000);
+        playFixedSound(explosionSound, () => {
+          setTimeout(() => {
+            isExplosionPlaying = false;
+            count++;
+          }, 1000); // ← 爆発後1秒視認延長
+        });
+        count++;
         return;
       }
 
