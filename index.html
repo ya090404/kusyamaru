@@ -1,56 +1,60 @@
 let tapCount = 0;
+let canTap = true;
+
 const punchImages = ['right.png', 'left.png'];
 const crackImages = ['crack1.png', 'crack2.png', 'crack3.png'];
 
 document.getElementById('punchButton').addEventListener('click', () => {
+  if (!canTap) return;
   tapCount++;
 
-  // 1〜10回目：パンチ交互＋パンチSE
   if (tapCount >= 1 && tapCount <= 10) {
     document.getElementById('mainImage').src = punchImages[(tapCount - 1) % 2];
     new Audio('punch.mp3').play();
   }
 
-  // 11回目：ヒビ1＋パンチSE
   else if (tapCount === 11) {
     document.getElementById('overlayImage').src = crackImages[0];
     document.getElementById('overlayImage').style.display = 'block';
     new Audio('punch.mp3').play();
   }
 
-  // 12〜21回目：パンチ交互＋パンチSE
   else if (tapCount >= 12 && tapCount <= 21) {
     document.getElementById('mainImage').src = punchImages[(tapCount - 12) % 2];
     new Audio('punch.mp3').play();
   }
 
-  // 22回目：ヒビ2＋パンチSE
   else if (tapCount === 22) {
     document.getElementById('overlayImage').src = crackImages[1];
     document.getElementById('overlayImage').style.display = 'block';
     new Audio('punch.mp3').play();
   }
 
-  // 23〜32回目：パンチ交互＋パンチSE
   else if (tapCount >= 23 && tapCount <= 32) {
     document.getElementById('mainImage').src = punchImages[(tapCount - 23) % 2];
     new Audio('punch.mp3').play();
   }
 
-  // 33回目：ヒビ3＋パンチSE
   else if (tapCount === 33) {
     document.getElementById('overlayImage').src = crackImages[2];
     document.getElementById('overlayImage').style.display = 'block';
     new Audio('punch.mp3').play();
   }
 
-  // 34回目：爆発
   else if (tapCount === 34) {
+    canTap = false; // タップ禁止
     document.getElementById('mainImage').src = 'explosion.png';
-    new Audio('explosion.mp3').play();
+    const explosionSE = new Audio('explosion.mp3');
+    explosionSE.play();
+
+    // SEの長さを確実に待つため、onendedで処理を続ける
+    explosionSE.addEventListener('ended', () => {
+      setTimeout(() => {
+        canTap = true; // 2秒待ってからタップ再開
+      }, 2000);
+    });
   }
 
-  // 35回目：スッキリ
   else if (tapCount === 35) {
     document.getElementById('mainImage').src = 'sukkiri.png';
     new Audio('sukkiri.mp3').play();
