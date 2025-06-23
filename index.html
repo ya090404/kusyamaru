@@ -31,7 +31,7 @@
 <body>
   <h1>くしゃまるくん</h1>
   <div id="container">
-    <img id="mainImage" src="right.png" alt="main">
+    <img id="mainImage" src="punch_right.PNG" alt="main">
     <img id="overlayImage" src="" alt="crack">
   </div>
   <br>
@@ -41,8 +41,8 @@
     let tapCount = 0;
     let canTap = true;
 
-    const punchImages = ['right.png', 'left.png'];
-    const crackImages = ['crack1.png', 'crack2.png', 'crack3.png'];
+    const punchImages = ['punch_right.PNG', 'punch_left.PNG'];
+    const crackImages = ['crack_1.PNG', 'crack_2.PNG', 'crack_3.PNG'];
 
     document.getElementById('punchButton').addEventListener('click', () => {
       if (!canTap) return;
@@ -86,20 +86,20 @@
 
       else if (tapCount === 34) {
         canTap = false;
-        mainImage.src = 'explosion.png';
+        mainImage.src = 'explosion.PNG';
         const explosionSE = new Audio('explosion.mp3');
         explosionSE.play();
 
         explosionSE.addEventListener('ended', () => {
           setTimeout(() => {
             canTap = true;
-          }, 2000); // 爆発SE終了後 +2秒
+          }, 2000);
         });
       }
 
       else if (tapCount === 35) {
-        mainImage.src = 'sukkiri.png';
-        new Audio('sukkiri.mp3').play();
+        mainImage.src = 'clear.PNG';
+        new Audio('clear.mp3').play();
       }
     });
   </script>
