@@ -52,8 +52,9 @@
     let gameStarted = false;
     let isExplosionPlaying = false;
     let isClearShown = false;
+    let isTapDisabled = false;
 
-    // 画像プリロード
+    // プリロード
     const preloadImages = [
       startImage, clearImage, explosionImage,
       ...crackImages, ...punchRightImages, ...punchLeftImages
@@ -83,6 +84,8 @@
     }
 
     function handleClick() {
+      if (isTapDisabled) return;
+
       if (!gameStarted) {
         gameStarted = true;
         playFixedSound(startSound);
@@ -111,12 +114,16 @@
 
       if (count === 33) {
         isExplosionPlaying = true;
+        isTapDisabled = true; // ← ここでタップを無効化
         showImage(explosionImage);
         const explosionAudio = new Audio(explosionSound);
         explosionAudio.play().catch(() => {});
         explosionAudio.addEventListener("ended", () => {
           isExplosionPlaying = false;
         });
+        setTimeout(() => {
+          isTapDisabled = false; // ← 2秒後に再びタップ可能に
+        }, 2000);
         count++;
         return;
       }
@@ -138,7 +145,7 @@
         return;
       }
 
-      // パンチ画像切り替え
+      // パンチ表示（交互・2パターン）
       if (isRight) {
         showImage(punchRightImages[rightIndex]);
         rightIndex = (rightIndex + 1) % punchRightImages.length;
