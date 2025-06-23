@@ -26,45 +26,21 @@
   <script>
     const image = document.getElementById("image");
 
-    // 音声ファイル
-    const punchSrc = "punch.mp3";
-    const explosionSrc = "explosion.mp3";
-    const clearSrc = "clear.mp3";
+    const punchSound = new Audio("punch.mp3");
+    const explosionSound = new Audio("explosion.mp3");
+    const clearSound = new Audio("clear.mp3");
 
-    // 画像ファイル
     const crackImages = ["crack_1.PNG", "crack_2.PNG", "crack_3.PNG"];
     const explosionImage = "explosion.PNG";
     const clearImage = "clear.PNG";
-
     const totalPunches = 34;
+
     let count = 0;
     let isRight = true;
-    let allowNextTap = true;
+    let isClickable = true;
 
-    // 🔁 画像・音声をプリロード
-    function preloadResources() {
-      const images = [
-        "punch_right.PNG",
-        "punch_left.PNG",
-        ...crackImages,
-        explosionImage,
-        clearImage
-      ];
-      images.forEach(src => {
-        const img = new Image();
-        img.src = src;
-      });
-
-      [punchSrc, explosionSrc, clearSrc].forEach(src => {
-        const audio = new Audio();
-        audio.src = src;
-      });
-    }
-
-    preloadResources();
-
-    function playSound(src) {
-      const audio = new Audio(src);
+    function playSound(audio) {
+      audio.pause();
       audio.currentTime = 0;
       audio.play().catch(() => {});
     }
@@ -74,42 +50,47 @@
     }
 
     function handleClick() {
-      if (!allowNextTap || count >= totalPunches) return;
+      if (!isClickable || count >= totalPunches) return;
 
-      // 💥 爆発（33発目前）
-      if (count === 32) {
-        allowNextTap = false;
-        count++;
-        showImage(explosionImage);
-        playSound(explosionSrc);
-        setTimeout(() => {
-          allowNextTap = true;
-        }, 2000);
-        return;
-      }
-
-      // 🎉 すっきり（34発目）
-      if (count === 33) {
-        count++;
-        showImage(clearImage);
-        playSound(clearSrc);
-        return;
-      }
-
-      // 🔨 ヒビ演出（10, 20, 30発目）
-      if ((count + 1) % 10 === 0 && count < 31) {
-        count++;
-        const index = Math.floor(count / 10);
-        showImage(crackImages[index]);
-        playSound(punchSrc);
-        return;
-      }
-
-      // 🤜 通常パンチ（左右交互）
+      isClickable = false; // タップクールタイム開始
       count++;
+
+      // すっきり（34回目）
+      if (count === 34) {
+        showImage(clearImage);
+        playSound(clearSound);
+        return;
+      }
+
+      // 爆発（33回目）
+      if (count === 33) {
+        showImage(explosionImage);
+        playSound(explosionSound);
+        setTimeout(() => {
+          isClickable = true;
+        }, 2000); // 爆発中は2秒停止
+        return;
+      }
+
+      // ヒビ演出（10・20・30回目）
+      if (count % 10 === 0 && count <= 30) {
+        const index = count / 10 - 1;
+        showImage(crackImages[index]);
+        playSound(punchSound);
+        setTimeout(() => {
+          isClickable = true;
+        }, 500); // ヒビだけ0.5秒停止
+        return;
+      }
+
+      // 通常パンチ
       showImage(isRight ? "punch_right.PNG" : "punch_left.PNG");
       isRight = !isRight;
-      playSound(punchSrc);
+      playSound(punchSound);
+
+      setTimeout(() => {
+        isClickable = true;
+      }, 200); // 通常パンチは高速対応（0.2秒）
     }
 
     image.addEventListener("click", handleClick);
