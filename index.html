@@ -1,88 +1,58 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>くしゃまるくんパンチ</title>
-  <style>
-    body {
-      margin: 0;
-      background: black;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-    #image {
-      width: 100%;
-      height: auto;
-      max-width: 500px;
-      image-rendering: pixelated;
-    }
-  </style>
-</head>
-<body>
-  <img id="image" src="punch_right.PNG" alt="くしゃまるくん"/>
-  <script>
-    const image = document.getElementById("image");
-    const punchSrc = "punch.mp3";
-    const explosionSrc = "explosion.mp3";
-    const clearSrc = "clear.mp3";
+let tapCount = 0;
+const punchImages = ['right.png', 'left.png'];
+const crackImages = ['crack1.png', 'crack2.png', 'crack3.png'];
 
-    const crackImages = ["crack_1.PNG", "crack_2.PNG", "crack_3.PNG"];
-    const explosionImage = "explosion.PNG";
-    const clearImage = "clear.PNG";
-    const totalPunches = 34; // ← すっきりを34回目に表示する
+document.getElementById('punchButton').addEventListener('click', () => {
+  tapCount++;
 
-    let count = 0;
-    let isRight = true;
+  // 1〜10回目：パンチ交互＋パンチSE
+  if (tapCount >= 1 && tapCount <= 10) {
+    document.getElementById('mainImage').src = punchImages[(tapCount - 1) % 2];
+    new Audio('punch.mp3').play();
+  }
 
-    function playSound(src) {
-      const audio = new Audio(src);
-      audio.currentTime = 0;
-      audio.play().catch(() => {});
-    }
+  // 11回目：ヒビ1＋パンチSE
+  else if (tapCount === 11) {
+    document.getElementById('overlayImage').src = crackImages[0];
+    document.getElementById('overlayImage').style.display = 'block';
+    new Audio('punch.mp3').play();
+  }
 
-    function showImage(src) {
-      image.src = src;
-    }
+  // 12〜21回目：パンチ交互＋パンチSE
+  else if (tapCount >= 12 && tapCount <= 21) {
+    document.getElementById('mainImage').src = punchImages[(tapCount - 12) % 2];
+    new Audio('punch.mp3').play();
+  }
 
-    function handleClick() {
-      if (count >= totalPunches) return;
+  // 22回目：ヒビ2＋パンチSE
+  else if (tapCount === 22) {
+    document.getElementById('overlayImage').src = crackImages[1];
+    document.getElementById('overlayImage').style.display = 'block';
+    new Audio('punch.mp3').play();
+  }
 
-      count++;
+  // 23〜32回目：パンチ交互＋パンチSE
+  else if (tapCount >= 23 && tapCount <= 32) {
+    document.getElementById('mainImage').src = punchImages[(tapCount - 23) % 2];
+    new Audio('punch.mp3').play();
+  }
 
-      if (count === 34) {
-        showImage(clearImage);
-        playSound(clearSrc);
-        return;
-      }
+  // 33回目：ヒビ3＋パンチSE
+  else if (tapCount === 33) {
+    document.getElementById('overlayImage').src = crackImages[2];
+    document.getElementById('overlayImage').style.display = 'block';
+    new Audio('punch.mp3').play();
+  }
 
-      if (count === 33) {
-        showImage(explosionImage);
-        playSound(explosionSrc);
-        return;
-      }
+  // 34回目：爆発
+  else if (tapCount === 34) {
+    document.getElementById('mainImage').src = 'explosion.png';
+    new Audio('explosion.mp3').play();
+  }
 
-      if (count % 10 === 0) {
-        const index = Math.floor(count / 10) - 1;
-        if (crackImages[index]) {
-          showImage(crackImages[index]);
-          playSound(punchSrc);
-        }
-        return;
-      }
-
-      if (isRight) {
-        showImage("punch_right.PNG");
-      } else {
-        showImage("punch_left.PNG");
-      }
-      isRight = !isRight;
-      playSound(punchSrc);
-    }
-
-    image.addEventListener("click", handleClick);
-  </script>
-</body>
-</html>
+  // 35回目：スッキリ
+  else if (tapCount === 35) {
+    document.getElementById('mainImage').src = 'sukkiri.png';
+    new Audio('sukkiri.mp3').play();
+  }
+});
