@@ -1,97 +1,85 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>くしゃまるくんアプリ</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>くしゃまるくんパンチ</title>
   <style>
     body {
       margin: 0;
-      background-color: black;
-      overflow: hidden;
-      touch-action: manipulation;
-    }
-    #container {
-      position: relative;
-      width: 100vw;
+      background: black;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       height: 100vh;
     }
-    #character, #overlay {
-      position: absolute;
+    #image {
       width: 100%;
-      height: 100%;
-      object-fit: contain;
-    }
-    #overlay {
-      pointer-events: none;
+      height: auto;
+      max-width: 500px;
+      image-rendering: pixelated;
     }
   </style>
 </head>
 <body>
-  <div id="container">
-    <img id="character" src="punch_right.PNG" />
-    <img id="overlay" />
-  </div>
-
-  <audio id="punchSound" src="punch.mp3" preload="auto"></audio>
-  <audio id="explosionSound" src="explosion.mp3" preload="auto"></audio>
-  <audio id="clearSound" src="clear.mp3" preload="auto"></audio>
-
+  <img id="image" src="punch_right.PNG" alt="くしゃまるくん"/>
   <script>
-    const character = document.getElementById('character');
-    const overlay = document.getElementById('overlay');
-    const punchSound = document.getElementById('punchSound');
-    const explosionSound = document.getElementById('explosionSound');
-    const clearSound = document.getElementById('clearSound');
+    const image = document.getElementById("image");
+    const punchSounds = ["punch.mp3", "punch.mp3"]; // 右・左どちらも同じSE
+    const crackImages = ["crack_1.PNG", "crack_2.PNG", "crack_3.PNG"];
+    const explosionImage = "explosion.PNG";
+    const clearImage = "clear.PNG";
+    const totalPunches = 33;
 
-    const punchImages = ['punch_right.PNG', 'punch_left.PNG'];
-    const cracks = ['crack_1.PNG', 'crack_2.PNG', 'crack_3.PNG'];
+    let count = 0;
+    let isRight = true;
 
-    let punchCount = 0;
-    let punchToggle = 0;
-    let crackPhase = 0;
-    let showingCrack = false;
+    function playSound(src) {
+      const audio = new Audio(src);
+      audio.currentTime = 0;
+      audio.play().catch(() => {});
+    }
 
-    document.getElementById('container').addEventListener('click', () => {
-      if (punchCount >= 34) return;
+    function showImage(src) {
+      image.src = src;
+    }
 
-      // 爆発：33発目
-      if (punchCount === 33) {
-        overlay.src = 'explosion.PNG';
-        character.style.display = 'none';
-        explosionSound.play();
-        punchCount++;
+    function handleClick() {
+      if (count >= totalPunches) return;
+
+      count++;
+
+      if (count === 33) {
+        showImage(explosionImage);
+        playSound("explosion.mp3");
+        setTimeout(() => {
+          showImage(clearImage);
+          playSound("clear.mp3");
+        }, 1000); // 1秒後にすっきり画像表示
         return;
       }
 
-      // すっきり：34発目
-      if (punchCount === 34) {
-        overlay.src = 'clear.PNG';
-        clearSound.play();
-        punchCount++;
+      // 毎10回ごとにヒビ画像を表示
+      if (count % 10 === 0) {
+        const index = count / 10 - 1;
+        if (crackImages[index]) {
+          showImage(crackImages[index]);
+          playSound("punch.mp3");
+        }
         return;
       }
 
-      // ヒビ演出（10回, 20回, 30回目）だけカットイン → 次パンチで通常戻す
-      if ((punchCount > 0) && (punchCount % 10 === 0) && crackPhase < cracks.length) {
-        overlay.src = cracks[crackPhase];
-        crackPhase++;
-        punchSound.currentTime = 0;
-        punchSound.play();
-        showingCrack = true;
-        punchCount++;
-        return;
+      // 右左パンチ交互
+      if (isRight) {
+        showImage("punch_right.PNG");
+      } else {
+        showImage("punch_left.PNG");
       }
+      isRight = !isRight;
+      playSound("punch.mp3");
+    }
 
-      // 通常パンチ表示
-      character.src = punchImages[punchToggle];
-      punchToggle = 1 - punchToggle;
-
-      overlay.src = ''; // ヒビ画像が出ていたら消す
-      punchSound.currentTime = 0;
-      punchSound.play();
-
-      punchCount++;
-    });
+    image.addEventListener("click", handleClick);
   </script>
 </body>
 </html>
