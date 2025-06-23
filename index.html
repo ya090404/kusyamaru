@@ -35,7 +35,6 @@
     let count = 0;
     let isRight = true;
     let isCrackTime = false;
-    let isExploded = false;
 
     function playPunchSound() {
       const file = punchFiles[Math.floor(Math.random() * punchFiles.length)];
@@ -55,30 +54,26 @@
     function handleClick() {
       if (count >= totalPunches) return;
 
-      // ヒビ中：SEだけ鳴らす（画像は変えない）
       if (isCrackTime) {
+        // ヒビ表示中はSEだけ鳴らす
         playPunchSound();
         return;
       }
 
-      // すっきり演出（34回目）
+      count++;
+
       if (count === 34) {
         showImage(clearImage);
         playFixedSound("clear.mp3");
-        count++;
         return;
       }
 
-      // 爆発演出（33回目 or ヒビ後に自動発動された場合）
-      if (count === 33 || isExploded) {
+      if (count === 33) {
         showImage(explosionImage);
         playFixedSound("explosion.mp3");
-        isExploded = false; // リセット
-        count++;
         return;
       }
 
-      // ヒビ割れ演出（10, 20, 30回目）
       if (count % 10 === 0 && count <= 30) {
         const index = count / 10 - 1;
         isCrackTime = true;
@@ -87,27 +82,16 @@
 
         setTimeout(() => {
           isCrackTime = false;
-
-          // 30回目のあとだけ爆発に移行
-          if (count === 30) {
-            count = 33; // 爆発用にジャンプ
-            isExploded = true;
-          } else {
-            // 通常パンチ表示に戻す
-            showImage(isRight ? "punch_right.PNG" : "punch_left.PNG");
-            isRight = !isRight;
-          }
+          showImage(isRight ? "punch_right.PNG" : "punch_left.PNG");
+          isRight = !isRight;
         }, 400);
 
-        count++;
         return;
       }
 
-      // 通常パンチ
       showImage(isRight ? "punch_right.PNG" : "punch_left.PNG");
       isRight = !isRight;
       playPunchSound();
-      count++;
     }
 
     image.addEventListener("click", handleClick);
