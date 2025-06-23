@@ -32,10 +32,11 @@
     const crackImages = ["crack_1.PNG", "crack_2.PNG", "crack_3.PNG"];
     const explosionImage = "explosion.PNG";
     const clearImage = "clear.PNG";
-    const totalPunches = 34; // ← すっきりを34回目に表示する
+    const totalPunches = 34;
 
     let count = 0;
     let isRight = true;
+    let allowNextTap = true;
 
     function playSound(src) {
       const audio = new Audio(src);
@@ -48,7 +49,7 @@
     }
 
     function handleClick() {
-      if (count >= totalPunches) return;
+      if (!allowNextTap || count >= totalPunches) return;
 
       count++;
 
@@ -61,6 +62,10 @@
       if (count === 33) {
         showImage(explosionImage);
         playSound(explosionSrc);
+        allowNextTap = false;
+        setTimeout(() => {
+          allowNextTap = true;
+        }, 2000); // 2秒間だけタップ無効
         return;
       }
 
