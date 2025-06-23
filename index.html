@@ -94,18 +94,18 @@
         return;
       }
 
-      if (count >= totalPunches) return;
-
-      if (isCrackTime) {
-        playPunchSound();
-        return;
-      }
-
-      if (count === 34) {
+      if (count === 34 && !isClearShown) {
         isClearShown = true;
         showImage(clearImage);
         playFixedSound(clearSound);
         count++;
+        return;
+      }
+
+      if (count >= totalPunches) return;
+
+      if (isCrackTime) {
+        playPunchSound();
         return;
       }
 
