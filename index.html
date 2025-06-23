@@ -46,10 +46,9 @@
     let count = 0;
     let isRight = true;
     let isCrackTime = false;
-    let isExploded = false;
     let gameStarted = false;
+    let isWaitingExplosion = false;
 
-    // プリロード（← clearImage 忘れず追加済み）
     const preloadImages = [startImage, clearImage, explosionImage, ...crackImages, "punch_right.PNG", "punch_left.PNG"];
     preloadImages.forEach(src => {
       const img = new Image();
@@ -67,13 +66,16 @@
       audio.play().catch(() => {});
     }
 
-    function playFixedSound(src) {
+    function playFixedSound(src, onEnd) {
       const audio = new Audio(src);
+      if (onEnd) {
+        audio.addEventListener("ended", onEnd);
+      }
       audio.play().catch(() => {});
     }
 
     function handleClick() {
-      // スタート画面の処理（1回だけ）
+      // スタート画面
       if (!gameStarted) {
         gameStarted = true;
         playFixedSound(startSound);
@@ -86,14 +88,7 @@
         return;
       }
 
-      // ゲーム本編（以下、以前と同一）
-      if (count >= totalPunches) return;
-
-      if (isCrackTime) {
-        playPunchSound();
-        return;
-      }
-
+      // すっきり表示（34回目）
       if (count === 34) {
         showImage(clearImage);
         playFixedSound("clear.mp3");
@@ -101,19 +96,23 @@
         return;
       }
 
-      if (isExploded) {
-        count = 34;
-        handleClick();
-        return;
-      }
-
-      if (count === 33) {
+      // 爆発シーン（33回目）→ SEが終わるまで止める
+      if (count === 33 && !isWaitingExplosion) {
+        isWaitingExplosion = true;
         showImage(explosionImage);
-        playFixedSound("explosion.mp3");
-        isExploded = true;
+        playFixedSound("explosion.mp3", () => {
+          isWaitingExplosion = false;
+          count++;
+        });
         return;
       }
 
+      if (count > totalPunches || isCrackTime || isWaitingExplosion) {
+        playPunchSound(); // ヒビ表示中や爆発中もSEのみ鳴らす
+        return;
+      }
+
+      // ヒビ演出（10,20,30）
       if (count === 10 || count === 20 || count === 30) {
         const index = count / 10 - 1;
         isCrackTime = true;
@@ -123,16 +122,17 @@
         setTimeout(() => {
           isCrackTime = false;
           if (count === 30) {
-            count = 33; // 爆発へ
+            count = 33; // 爆発へスキップ
           } else {
             showImage(isRight ? "punch_right.PNG" : "punch_left.PNG");
             isRight = !isRight;
             count++;
           }
-        }, 400);
+        }, 600); // ←⭐️視認時間を0.6秒に拡張
         return;
       }
 
+      // 通常パンチ
       showImage(isRight ? "punch_right.PNG" : "punch_left.PNG");
       isRight = !isRight;
       playPunchSound();
